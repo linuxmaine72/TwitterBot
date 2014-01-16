@@ -22,6 +22,7 @@ sub said {
   # twitter link
   my $twlk = Net::Twitter->new(
     traits   => [qw/OAuth API::RESTv1_1/],
+	ssl 	 => 1,
     consumer_key        => $self->{consumer_key},
     consumer_secret     => $self->{consumer_secret},
     access_token        => $self->{token},
@@ -52,11 +53,11 @@ sub said {
 
       # update twitter account...
 	  try {
-		  $twlk->update($1);
+		  my $status = $twlk->update($1);
 		  $self->say(
 			who => $msg->{who},
 			channel => $msg->{channel},
-			body => "C'est parti !"
+			body => "C'est parti ! (id: ".$status->{id_str}.")"
 		  );
 	  } catch {
 		  $self->say(
@@ -141,11 +142,11 @@ sub said {
       }
 
       # update twitter account...
-      $twlk->update($2,{in_reply_to_status_id => $1});
+      my $status = $twlk->update($2,{in_reply_to_status_id => $1});
       $self->say(
         who => $msg->{who},
         channel => $msg->{channel},
-        body => "C'est parti !"
+        body => "C'est parti ! (id: ".$status->{id_str}.")"
       );
       return;
     } else {
@@ -289,6 +290,7 @@ sub tick {
   # twitter link
   my $twlk = Net::Twitter->new(
     traits   => [qw/OAuth API::RESTv1_1/],
+	ssl 	 => 1,
     consumer_key        => $self->{consumer_key},
     consumer_secret     => $self->{consumer_secret},
     access_token        => $self->{token},
@@ -321,7 +323,7 @@ sub tick {
     while ($i <= $len) {
       $self->say(
         channel => $self->{channels}->[0],
-        body => $statuses[$len-$i]->{user}->{screen_name}." => ".$statuses[$len-$i]->{text}." (#".$statuses[$len-$i]->{id_str}.")"
+        body => $statuses[$len-$i]->{user}->{screen_name}." => ".$statuses[$len-$i]->{text}." (id: ".$statuses[$len-$i]->{id_str}." )"
       );
       $i++;
     }
